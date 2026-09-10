@@ -1,34 +1,41 @@
 # Architecture
 
-This repository is a **dependency-free architectural scaffold**. No framework, database,
-cloud provider, or AI vendor is chosen yet.
+Implemented with **Django + SQLite** (see ADR 0002). The layering below is preserved on
+top of Django.
 
 ## Layered architecture and dependency direction
 
 ```
-        API / UI
+        API / UI  (Django views, urls)
            |
            v
-       Application layer
+       Application layer   (use cases; plain Python)
            |
            v
-        Domain layer
+        Domain layer       (business rules; NO django imports)
            |
            v
-       Infrastructure
+       Infrastructure      (Django ORM models + migrations, repositories, clients)
 ```
 
-Dependencies point **downward and inward**. Outer layers depend on inner layers; inner
-layers never import outer layers.
+Dependencies point **inward**. Outer layers depend on inner layers; inner layers never
+import outer layers.
 
-- **API / UI** — delivery mechanisms (HTTP, CLI, web UI). Translates external input into
-  application calls. Contains no business rules.
-- **Application** — use cases / orchestration. Coordinates domain objects and
-  infrastructure through interfaces (ports).
-- **Domain** — business concepts and rules. Pure. No framework, DB, cloud, or AI vendor
-  imports.
-- **Infrastructure** — adapters implementing the interfaces the inner layers declare:
-  persistence, messaging, external APIs, AI providers.
+- **API / UI** — `src/api/`. Django `urls.py` / `views.py`. Translates HTTP into
+  application calls. No business rules.
+- **Application** — `src/application/`. Use cases / orchestration. Coordinates domain and
+  infrastructure through port interfaces. Plain Python.
+- **Domain** — `src/domain/`. Business concepts and rules. Plain Python. **Must not
+  import `django`**, `django.db`, cloud SDKs, or AI vendors.
+- **Infrastructure** — `src/infrastructure/`. Django ORM `models.py`, `migrations/`,
+  repository implementations, external API / AI provider adapters.
+- **Django project package** — `src/config/`: `settings.py`, `urls.py`, `wsgi.py`,
+  `asgi.py`. `DJANGO_SETTINGS_MODULE = src.config.settings`.
+
+## Database
+SQLite (`django.db.backends.sqlite3`). File at `db.sqlite3` in the repo root
+(git-ignored). Migrations are committed. Optional `DATABASE_URL`
+(`sqlite:////abs/path/db.sqlite3`) overrides the location.
 
 ## AI dependency direction
 
@@ -42,7 +49,7 @@ layers never import outer layers.
            Infrastructure
 ```
 
-The domain must **not** depend on a specific AI provider. AI providers are infrastructure
+The domain must not depend on a specific AI provider. AI providers are infrastructure
 adapters behind a provider-neutral interface.
 
 ## Conceptual AI view

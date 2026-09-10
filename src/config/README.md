@@ -1,22 +1,27 @@
 # src/config/
 
 ## Purpose
-Loads and validates configuration for the application. Configuration *values* come from
-the environment; this directory holds only the code that reads and shapes them.
+The **Django project package**: settings, URL configuration, and WSGI/ASGI entry points.
+Configuration *values* come from the environment (`.env.example`); this package only
+reads and shapes them.
 
-## What belongs here
-- Config schema / typed accessors
-- Environment variable parsing and validation
-- Defaults for non-sensitive settings
+## Contents
+- `settings.py` — reads env vars; SQLite database; minimal `INSTALLED_APPS`
+- `urls.py` — root URL conf, delegates to per-app `urls.py`
+- `wsgi.py` / `asgi.py` — server entry points
+
+`DJANGO_SETTINGS_MODULE` is `src.config.settings`. Run commands from the repo root:
+
+```
+python manage.py migrate
+python manage.py runserver
+python manage.py test
+```
 
 ## What does NOT belong here
-- Secret values (use environment / secret manager)
+- Secret values (use the environment / a secret manager)
 - Business logic
-- Per-environment value files (see repo-root `config/`)
+- App code (that goes in `src/api`, `src/application`, `src/domain`, `src/infrastructure`)
 
-## Example future files
-- `src/config/index.*`
-- `src/config/schema.*`
-
-## Dependencies that may eventually be introduced
-A schema/validation library — via an ADR.
+## Dependencies
+Django (chosen — see ADR 0002).

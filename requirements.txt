@@ -1,0 +1,4 @@
+# Runtime dependencies. Pinned ranges; see docs/architecture/decisions/0002-django-sqlite.md
+Django>=6.1,<6.2
+
+# SQLite needs no package (bundled with Python's standard library).

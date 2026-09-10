@@ -1,22 +1,22 @@
 # src/domain/
 
 ## Purpose
-Contains business concepts and rules. Domain code must remain independent from
-frameworks, databases, cloud services, and AI vendors.
+Business concepts and rules. Plain Python only. **Must not import Django**, `django.db`,
+SQLite APIs, cloud SDKs, or AI vendors.
 
 ## What belongs here
-- Entities, value objects, aggregates
-- Domain services and business invariants
+- Entities, value objects, aggregates (plain classes / dataclasses)
+- Domain services and invariants
 - Domain events
 
 ## What does NOT belong here
-- I/O of any kind (HTTP, DB, filesystem, network)
-- Framework, ORM, cloud SDK, or AI vendor imports
+- `django.*` imports of any kind
+- I/O (HTTP, DB, filesystem, network)
 - Configuration reading
 
 ## Example future files
-- `src/domain/order.*`
-- `src/domain/money.*`
+- `src/domain/order.py`
+- `src/domain/money.py`
 
-## Dependencies that may eventually be introduced
-None. The domain stays dependency-free by design.
+## Dependencies
+None. Framework independence is enforced by review.

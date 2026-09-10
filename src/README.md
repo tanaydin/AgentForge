@@ -1,17 +1,27 @@
 # src/
 
-Application source code, organized by architectural layer. Currently only `README.md`
-placeholders — no implementation yet.
+Application source code, organized by architectural layer, implemented with **Django +
+SQLite**.
 
 ```
 src/
-  api/            delivery mechanisms (HTTP, CLI, UI)
-  application/    use cases / orchestration
-  domain/         business concepts and rules (pure)
-  infrastructure/ adapters: persistence, messaging, external APIs, AI providers
+  config/         Django project: settings, urls, wsgi/asgi  (DJANGO_SETTINGS_MODULE=src.config.settings)
+  api/            Django delivery layer: urls, views, serializers (thin)
+  application/    use cases / orchestration + port interfaces (plain Python)
+  domain/         business concepts and rules (plain Python; no django imports)
+  infrastructure/ adapters: Django ORM models + migrations, repositories, external clients
   ai/             application-level AI implementation (behind interfaces)
-  config/         configuration loading (values come from environment)
 ```
 
-Dependency direction: `api -> application -> domain`, with `infrastructure` and `ai`
-implementing interfaces declared by the inner layers. The domain imports nothing outward.
+Dependency direction: `api -> application -> domain`. `infrastructure` and `ai` implement
+interfaces the inner layers declare. **The domain never imports `django`.**
+
+Common commands (run from repo root):
+
+```
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver      # GET /health/ -> {"status": "ok"}
+python manage.py test
+```

@@ -10,18 +10,30 @@ Thumbs.db
 .env.*
 !.env.example
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Django / SQLite
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+/staticfiles/
+/media/
+
 # Logs
 *.log
 logs/
 
-# Build / dependency output (nothing generates these yet; listed for the future)
-node_modules/
+# Coverage / build
+.coverage
+htmlcov/
+coverage/
 dist/
 build/
-target/
-__pycache__/
-*.pyc
-.venv/
-venv/
-coverage/
-.cache/

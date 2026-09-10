@@ -2,21 +2,28 @@
 
 Instructions for AI coding agents operating on this repository.
 
+Stack: **Python 3.12+ / Django 6.1 / SQLite** (ADR 0002).
+
 ## Ground rules
 1. Read `README.md` before modifying the repository.
 2. Understand the architecture (`docs/architecture/`) before adding files.
 3. Do not bypass architectural boundaries. `api -> application -> domain`;
-   `infrastructure` and `ai` implement interfaces the inner layers declare; the domain
-   imports nothing outward.
-4. Do not introduce dependencies (packages, SDKs, frameworks, databases, containers)
-   without an ADR in `docs/architecture/decisions/` that justifies it.
-5. Do not expose secrets. Configuration is placeholder-only (`.env.example`).
-6. Do not modify unrelated files.
-7. Add tests for implemented behavior (not for scaffold placeholders).
-8. Update documentation when the architecture changes.
-9. Follow Git conventions: branch names (`feature/*`, `fix/*`, …) and Conventional
-   Commits (`feat:`, `fix:`, …). See `docs/project-management/branches.md`.
-10. Prefer simple solutions over unnecessary abstraction.
+   `infrastructure` and `ai` implement interfaces the inner layers declare.
+4. **The domain and application layers must not import `django`.** Django code
+   (`models.py`, migrations, views, urls, settings) belongs only in `src/config/`,
+   `src/api/`, `src/infrastructure/`.
+5. Do not introduce dependencies beyond Django without an ADR in
+   `docs/architecture/decisions/` that justifies it.
+6. Do not expose secrets. `SECRET_KEY` and friends come from the environment;
+   `.env.example` lists names only. `.env` and `db.sqlite3` are git-ignored.
+7. Do not modify unrelated files.
+8. Add tests for implemented behavior (`python manage.py test`), not for scaffold
+   placeholders. Unit tests must not touch the database.
+9. Commit migrations. One concern per migration.
+10. Update documentation when the architecture changes.
+11. Follow Git conventions: branch names (`feature/*`, `fix/*`, ...) and Conventional
+    Commits (`feat:`, `fix:`, ...). See `docs/project-management/branches.md`.
+12. Prefer simple solutions over unnecessary abstraction.
 
 ## AI-specific rules
 - Agents talk to models through a provider-neutral interface, never a vendor SDK
@@ -35,17 +42,31 @@ Inspect  read the relevant README.md and existing code before writing
   |
 Implement  smallest change that satisfies the goal, within boundaries
   |
-Test     add/adjust tests for the behavior
+Test     python manage.py test
   |
 Review   self-check against these rules and the PR checklist
   |
 Document  update READMEs / ADRs if the architecture moved
 ```
 
+## Common commands (from repo root)
+
+```
+pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
+python manage.py test
+```
+
 ## Repository layout
+- `manage.py`, `requirements.txt` — Django entry point and dependencies
 - `.ai/` — repo-level AI config (agent instructions, prompts, tool descriptors, workflows, memory)
+- `src/config/` — Django project (settings, urls, wsgi/asgi)
+- `src/api/` — Django delivery layer (thin views)
+- `src/application/`, `src/domain/` — plain Python, no django imports
+- `src/infrastructure/` — Django ORM models + migrations, repositories, clients
 - `src/ai/` — application-level AI implementation (added later)
-- `src/` — application code by layer
 - `docs/` — architecture, development, AI, project management, deployment, security
 - `tests/` — unit / integration / end_to_end
 - `config/` — per-environment non-sensitive config placeholders

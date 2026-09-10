@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Developer tooling (optional; add via ADR before relying on it in CI)
+# ruff
+# black
+# pytest
+# pytest-django

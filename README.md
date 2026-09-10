@@ -1,25 +1,32 @@
 # Project
 
-> **This repository is currently a dependency-free architectural scaffold.**
-> No application functionality exists yet. No language, framework, database, cloud
-> provider, or AI vendor has been chosen.
+Stack: **Python 3.12+ / Django 6.1 / SQLite** (see `docs/architecture/decisions/0002-django-sqlite.md`).
+The repository keeps a layered architecture on top of Django: the domain and application
+layers are plain Python and never import `django`.
 
-## What this is
-A clean, technology-agnostic foundation: directories, documentation, conventions, and
-configuration placeholders. It is designed so that AI/LLM features, agentic systems,
-MCP/tools, APIs, web apps, project-management integrations, source-control hosts, CI/CD,
-testing, security, observability, and cloud services can all be added later without
-restructuring.
+## Quick start
+
+```
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+# GET http://127.0.0.1:8000/health/  ->  {"status": "ok"}
+python manage.py test
+```
+
+`DJANGO_SETTINGS_MODULE` is `src.config.settings`. Run all commands from the repo root.
 
 ## Architecture
 
 ```
-API / UI  ->  Application  ->  Domain  ->  Infrastructure
+API / UI (Django)  ->  Application  ->  Domain  ->  Infrastructure (Django ORM + SQLite)
 ```
 
-Dependencies point inward. The **domain** is pure — no framework, database, cloud, or AI
-vendor imports. **Infrastructure** and **AI** implement interfaces that the inner layers
-declare.
+Dependencies point inward. The **domain** (`src/domain/`) is plain Python — no framework,
+database, cloud, or AI-vendor imports. **Infrastructure** (`src/infrastructure/`) holds
+the ORM models, migrations, and repository implementations that satisfy interfaces the
+inner layers declare.
 
 ```
 AI (agents -> tools -> providers; memory; workflows)
@@ -36,17 +43,19 @@ Details: `docs/architecture/`. Decisions: `docs/architecture/decisions/`.
 ## Directory structure
 
 ```
+manage.py           Django management entry point
+requirements.txt    runtime dependencies (Django)
 .github/            GitHub issue/PR templates, workflow placeholder
 .gitlab/            GitLab config placeholder
 .ai/                repo-level AI config: agents, prompts, tools, workflows, memory
 docs/               architecture, development, ai, project-management, deployment, security
 src/
-  api/              delivery (HTTP, CLI, UI)
-  application/      use cases / orchestration + port interfaces
-  domain/           business concepts and rules (pure)
-  infrastructure/   adapters: persistence, messaging, external APIs, AI providers
+  config/           Django project: settings.py, urls.py, wsgi.py, asgi.py
+  api/              Django delivery layer: urls.py, views.py  (thin)
+  application/      use cases / orchestration + port interfaces (plain Python)
+  domain/           business concepts and rules (plain Python; NO django imports)
+  infrastructure/   Django ORM models + migrations, repositories, external clients
   ai/               application AI: agents, providers, tools, prompts, memory
-  config/           configuration loading
 tests/              unit / integration / end_to_end
 scripts/            developer/ops helper scripts
 config/             per-environment non-sensitive config placeholders
@@ -57,13 +66,18 @@ CHANGELOG.md        Keep a Changelog format
 LICENSE             not yet chosen
 ```
 
+## Database
+SQLite via `django.db.backends.sqlite3`. The database file is `db.sqlite3` in the repo
+root (git-ignored). Migrations under `src/infrastructure/migrations/` are committed.
+Set `DATABASE_URL=sqlite:////abs/path/db.sqlite3` to relocate it. Moving to
+PostgreSQL/MySQL later is a settings + driver change with its own ADR.
+
 ## AI architecture
 - `.ai/` — configuration guiding agents that work *on this repo*.
 - `src/ai/` — the product's own AI code, added later, behind provider-neutral interfaces.
-- No provider installed. Candidates: OpenAI, Anthropic, Google, Ollama, other local
-  models, others.
-- An agent = instructions + model provider + tools + memory + workflow, all wired through
-  interfaces. See `docs/ai/`.
+- No AI provider installed. Candidates: OpenAI, Anthropic, Google, Ollama, other local
+  models. An agent = instructions + model provider + tools + memory + workflow, wired
+  through interfaces. See `docs/ai/`.
 
 ## Source-control workflow
 
@@ -76,23 +90,16 @@ Commits: Conventional Commits. See `docs/project-management/`.
 
 ## Project-management workflow
 `Epic -> Feature -> Story -> Task -> Sub-task`, plus Bug / Tech debt / Security / Research
-/ Spike. Tool-neutral; can later integrate GitHub Projects, GitLab, Jira, Linear, or
-others. See `docs/project-management/`.
+/ Spike. Tool-neutral; can later integrate GitHub Projects, GitLab, Jira, Linear. See
+`docs/project-management/`.
 
 ## Development principles
 - Simple over clever; abstraction only when it pays for itself.
-- Respect layer boundaries; keep the domain pure.
+- Respect layer boundaries; the domain stays framework-free.
 - A new dependency requires an ADR that justifies it.
 - Tests accompany real behavior; docs track architecture changes.
 
-## How to introduce a dependency
-1. Write an ADR in `docs/architecture/decisions/` (context, decision, consequences).
-2. Add it in the correct layer — vendor SDKs only in `infrastructure/` or
-   `src/ai/providers/`.
-3. Pin the version; note supply-chain considerations.
-4. Update this README and `CHANGELOG.md`.
-
 ## Next step
-Choose the implementation language and, with an ADR each, the first framework, test
-runner, and (if needed) AI provider — then implement the first vertical slice through
-`api -> application -> domain`.
+Model the first domain concept in `src/domain/`, a use case in `src/application/` with a
+repository port, its Django-ORM implementation + migration in `src/infrastructure/`, and
+a view in `src/api/` — then add unit and integration tests.
