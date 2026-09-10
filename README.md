@@ -1,98 +1,62 @@
 # Project
 
-> **This repository is currently a dependency-free architectural scaffold.**
-> No application functionality exists yet. No language, framework, database, cloud
-> provider, or AI vendor has been chosen.
+A Laravel 13 web application backed by MariaDB, with a React (Inertia) frontend.
 
-## What this is
-A clean, technology-agnostic foundation: directories, documentation, conventions, and
-configuration placeholders. It is designed so that AI/LLM features, agentic systems,
-MCP/tools, APIs, web apps, project-management integrations, source-control hosts, CI/CD,
-testing, security, observability, and cloud services can all be added later without
-restructuring.
+The repository keeps the technology-agnostic architectural scaffold it started from —
+see [`docs/architecture/scaffold-overview.md`](docs/architecture/scaffold-overview.md)
+for the layered design (API → Application → Domain → Infrastructure) and
+[`AGENTS.md`](AGENTS.md) for the rules AI agents follow here. Technology decisions are
+recorded as ADRs in [`docs/architecture/decisions/`](docs/architecture/decisions/)
+([0002](docs/architecture/decisions/0002-laravel-mariadb-stack.md) covers this stack).
 
-## Architecture
+## Stack
 
-```
-API / UI  ->  Application  ->  Domain  ->  Infrastructure
-```
+| Concern       | Choice                                                  |
+|---------------|--------------------------------------------------------|
+| Runtime       | PHP 8.5                                                 |
+| Framework     | Laravel 13                                              |
+| Database      | MariaDB 11                                              |
+| Frontend      | React 19 · Inertia 2 · TypeScript · Tailwind 4 · Vite   |
+| Auth          | Laravel React starter kit (Fortify, passkeys, 2FA)      |
+| Local env     | Laravel Sail (Docker): app · MariaDB · Redis · Mailpit  |
+| Tests         | Pest 3                                                  |
+| Lint / types  | Laravel Pint · Larastan (PHPStan)                       |
 
-Dependencies point inward. The **domain** is pure — no framework, database, cloud, or AI
-vendor imports. **Infrastructure** and **AI** implement interfaces that the inner layers
-declare.
+## Getting started
 
-```
-AI (agents -> tools -> providers; memory; workflows)
-      |
-      v
-Application / Domain   (via provider-neutral interfaces)
-      |
-      v
-Infrastructure
-```
+Requires Docker.
 
-Details: `docs/architecture/`. Decisions: `docs/architecture/decisions/`.
+```bash
+cp .env.example .env
+composer install
+npm install
+php artisan key:generate
 
-## Directory structure
-
-```
-.github/            GitHub issue/PR templates, workflow placeholder
-.gitlab/            GitLab config placeholder
-.ai/                repo-level AI config: agents, prompts, tools, workflows, memory
-docs/               architecture, development, ai, project-management, deployment, security
-src/
-  api/              delivery (HTTP, CLI, UI)
-  application/      use cases / orchestration + port interfaces
-  domain/           business concepts and rules (pure)
-  infrastructure/   adapters: persistence, messaging, external APIs, AI providers
-  ai/               application AI: agents, providers, tools, prompts, memory
-  config/           configuration loading
-tests/              unit / integration / end_to_end
-scripts/            developer/ops helper scripts
-config/             per-environment non-sensitive config placeholders
-.env.example        environment variable names (no values)
-AGENTS.md           rules for AI coding agents
-CONTRIBUTING.md     workflow and conventions
-CHANGELOG.md        Keep a Changelog format
-LICENSE             not yet chosen
+./vendor/bin/sail up -d          # start app, MariaDB, Redis, Mailpit
+./vendor/bin/sail artisan migrate
+npm run dev                       # Vite dev server
 ```
 
-## AI architecture
-- `.ai/` — configuration guiding agents that work *on this repo*.
-- `src/ai/` — the product's own AI code, added later, behind provider-neutral interfaces.
-- No provider installed. Candidates: OpenAI, Anthropic, Google, Ollama, other local
-  models, others.
-- An agent = instructions + model provider + tools + memory + workflow, all wired through
-  interfaces. See `docs/ai/`.
+App: http://localhost · Mailpit: http://localhost:8025
+MariaDB is forwarded to host port **3307**, Redis to **6380** (defaults are left free
+for Homebrew services).
 
-## Source-control workflow
+Optionally alias Sail: `alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'`
 
+## Common commands
+
+```bash
+sail artisan test        # Pest suite
+composer lint            # Pint (format)
+composer types:check     # PHPStan
+sail artisan tinker
+sail down                # stop containers
 ```
-Issue -> Branch -> Commit -> Pull/Merge Request -> Review -> CI -> Merge
-```
 
-Branches: `main`, `feature/*`, `fix/*`, `refactor/*`, `chore/*`, `docs/*`.
-Commits: Conventional Commits. See `docs/project-management/`.
+## Layout
 
-## Project-management workflow
-`Epic -> Feature -> Story -> Task -> Sub-task`, plus Bug / Tech debt / Security / Research
-/ Spike. Tool-neutral; can later integrate GitHub Projects, GitLab, Jira, Linear, or
-others. See `docs/project-management/`.
-
-## Development principles
-- Simple over clever; abstraction only when it pays for itself.
-- Respect layer boundaries; keep the domain pure.
-- A new dependency requires an ADR that justifies it.
-- Tests accompany real behavior; docs track architecture changes.
-
-## How to introduce a dependency
-1. Write an ADR in `docs/architecture/decisions/` (context, decision, consequences).
-2. Add it in the correct layer — vendor SDKs only in `infrastructure/` or
-   `src/ai/providers/`.
-3. Pin the version; note supply-chain considerations.
-4. Update this README and `CHANGELOG.md`.
-
-## Next step
-Choose the implementation language and, with an ADR each, the first framework, test
-runner, and (if needed) AI provider — then implement the first vertical slice through
-`api -> application -> domain`.
+Laravel's directories (`app/`, `routes/`, `database/`, `resources/`, …) sit at the root.
+The scaffold's `src/{domain,application,infrastructure}/` are autoloaded as the
+`Domain\`, `Application\`, `Infrastructure\` namespaces for code that should stay
+framework-independent. `docs/`, `.ai/`, `.github/`, and `.gitlab/` are unchanged from
+the scaffold.

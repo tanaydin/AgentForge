@@ -1,10 +1,17 @@
 * text=auto eol=lf
 
-*.md   text
+*.md   text diff=markdown
 *.sh   text eol=lf
 *.json text
+*.blade.php diff=html
+*.css  diff=css
+*.html diff=html
+*.php  diff=php
 
 *.png binary
 *.jpg binary
 *.gif binary
 *.pdf binary
+
+CHANGELOG.md export-ignore
+.github/ export-ignore

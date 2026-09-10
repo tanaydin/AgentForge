@@ -1,7 +1,15 @@
 # Architecture
 
-This repository is a **dependency-free architectural scaffold**. No framework, database,
-cloud provider, or AI vendor is chosen yet.
+This repository runs on **Laravel 13 + MariaDB** (see
+[`decisions/0002-laravel-mariadb-stack.md`](decisions/0002-laravel-mariadb-stack.md)).
+It began as a dependency-free scaffold; that origin and the layered design below are
+described in [`scaffold-overview.md`](scaffold-overview.md). No cloud provider or AI
+vendor is chosen yet.
+
+Laravel's own directories (`app/`, `routes/`, `database/`, …) hold framework-facing
+code. The layers below map to `src/domain/`, `src/application/`, `src/infrastructure/`,
+autoloaded as the `Domain\`, `Application\`, and `Infrastructure\` namespaces — use
+them for code that should not depend on the framework.
 
 ## Layered architecture and dependency direction
 

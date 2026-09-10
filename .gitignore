@@ -4,6 +4,10 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+.fleet/
+.nova/
+.zed/
+.phpactor.json
 
 # Environment
 .env
@@ -13,9 +17,29 @@ Thumbs.db
 # Logs
 *.log
 logs/
+npm-debug.log
+yarn-error.log
 
-# Build / dependency output (nothing generates these yet; listed for the future)
-node_modules/
+# Laravel
+/vendor
+/node_modules
+/.phpunit.cache
+/.phpunit.result.cache
+/bootstrap/ssr
+/public/build
+/public/hot
+/public/storage
+/public/fonts-manifest.dev.json
+/storage/*.key
+/storage/pail
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
+/auth.json
+Homestead.json
+Homestead.yaml
+
+# Build / dependency output
 dist/
 build/
 target/

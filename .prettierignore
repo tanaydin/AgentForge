@@ -1,0 +1,19 @@
+# Build / vendor output
+public/build
+bootstrap/ssr
+resources/js/actions
+resources/js/routes
+resources/js/wayfinder
+composer.lock
+package-lock.json
+
+# Architectural scaffold — authored docs, kept verbatim (see docs/architecture/scaffold-overview.md)
+docs/
+.ai/
+.gitlab/
+src/**/README.md
+scripts/README.md
+AGENTS.md
+CONTRIBUTING.md
+CHANGELOG.md
+README.md
