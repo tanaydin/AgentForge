@@ -1,34 +1,45 @@
 # Architecture
 
-This repository is a **dependency-free architectural scaffold**. No framework, database,
-cloud provider, or AI vendor is chosen yet.
+Stack: **Django 6.1 + PostgreSQL + Celery/RabbitMQ + Redis** (see ADR 0002, ADR 0002).
+The layering below is preserved on top of Django.
 
 ## Layered architecture and dependency direction
 
 ```
-        API / UI
-           |
-           v
-       Application layer
-           |
-           v
-        Domain layer
-           |
-           v
-       Infrastructure
+        API / UI  (DRF views, urls)          Celery workers (src/infrastructure/tasks.py)
+           |                                        |
+           +--------------------+-------------------+
+                                v
+                     Application layer   (use cases; plain Python)
+                                |
+                                v
+                         Domain layer     (business rules; NO django / celery imports)
+                                |
+                                v
+        Infrastructure  (Postgres ORM + migrations, repositories, Redis, external clients)
 ```
 
-Dependencies point **downward and inward**. Outer layers depend on inner layers; inner
-layers never import outer layers.
+Dependencies point **inward**. Both delivery mechanisms — HTTP requests and Celery tasks
+— are thin and call the same application use cases.
 
-- **API / UI** — delivery mechanisms (HTTP, CLI, web UI). Translates external input into
-  application calls. Contains no business rules.
-- **Application** — use cases / orchestration. Coordinates domain objects and
-  infrastructure through interfaces (ports).
-- **Domain** — business concepts and rules. Pure. No framework, DB, cloud, or AI vendor
-  imports.
-- **Infrastructure** — adapters implementing the interfaces the inner layers declare:
-  persistence, messaging, external APIs, AI providers.
+- **API / UI** — `src/api/`. DRF routers/serializers/views. No business rules.
+- **Tasks** — `src/infrastructure/tasks.py`. Thin Celery wrappers; parse args → call a
+  use case → return a serializable result.
+- **Application** — `src/application/`. Use cases / orchestration. Plain Python.
+- **Domain** — `src/domain/`. Business concepts and rules. Plain Python. **No `django`,
+  no `celery`, no cloud/AI SDK imports.**
+- **Infrastructure** — `src/infrastructure/`. PostgreSQL ORM models, `migrations/`,
+  repository implementations, Redis access, external API / AI provider adapters, Celery
+  task wrappers.
+- **Django project package** — `src/config/`: `settings.py`, `urls.py`, `celery.py`,
+  `wsgi.py`, `asgi.py`. `DJANGO_SETTINGS_MODULE = src.config.settings`.
+
+## Backing services
+PostgreSQL (datastore), RabbitMQ (Celery broker), Redis (cache/sessions/optional
+results). See `docs/development/services.md`. Local: `docker compose up`.
+
+## Observability
+`/metrics` (Prometheus), `/health/` (health checks), Sentry (errors, Django + Celery).
 
 ## AI dependency direction
 
@@ -42,17 +53,7 @@ layers never import outer layers.
            Infrastructure
 ```
 
-The domain must **not** depend on a specific AI provider. AI providers are infrastructure
+The domain must not depend on a specific AI provider. AI providers are infrastructure
 adapters behind a provider-neutral interface.
 
-## Conceptual AI view
-
-```
-Agents  ->  Tools  ->  Providers
-   |
- Memory
-   |
-Workflows
-```
-
-See `docs/ai/` for detail and `docs/architecture/decisions/` for ADRs.
+See `docs/ai/` and `docs/architecture/decisions/` for ADRs.

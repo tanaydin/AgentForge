@@ -1,13 +1,32 @@
 # Testing
 
-Test directories exist under `tests/`:
+Runner: **pytest + pytest-django** (config in `pyproject.toml`).
 
-- `tests/unit/` — isolated, fast, no I/O. Domain and application logic.
-- `tests/integration/` — components together, real adapters (DB, external APIs) where
-  practical.
-- `tests/end_to_end/` — full flows through the API/UI.
+## Layout
+```
+tests/
+  unit/         isolated, fast, NO database, NO broker -> domain + application logic
+  integration/  real Postgres test DB, real Celery in eager mode -> repositories, tasks, use cases
+  end_to_end/   full flows through DRF (APIClient) and/or task dispatch
+```
 
-## Expectations
-- Add tests for implemented behavior, not for scaffold placeholders.
-- No test framework is chosen yet; that decision gets an ADR.
-- CI will run these once a pipeline is introduced.
+## Services in tests
+- **PostgreSQL**: pytest-django creates/destroys a test database. `--reuse-db` speeds
+  local runs. CI uses a Postgres service container.
+- **Celery**: run tasks synchronously with `CELERY_TASK_ALWAYS_EAGER = True` (set via a
+  fixture or test settings) — no RabbitMQ needed for most tests. Test the broker wiring
+  separately if required.
+- **Redis**: use Django's `locmem` cache in tests, or a disposable Redis in CI.
+
+## Rules
+- Unit tests must not hit the database, cache, or broker.
+- Add tests for implemented behavior, not scaffold placeholders.
+- Mark slow/integration tests so they can be selected: `pytest -m "not slow"`.
+
+## Commands
+```
+pytest                         # everything
+pytest tests/unit              # one package
+pytest -n auto                 # parallel (pytest-xdist)
+pytest --cov                   # coverage
+```

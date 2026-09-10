@@ -1,0 +1,43 @@
+# Runtime dependencies. Loose upper bounds; bump via ADR. See
+# docs/architecture/decisions/0002-production-stack.md
+
+# Web framework
+Django>=6.1,<6.2
+
+# Database (PostgreSQL)
+psycopg[binary]>=3.2,<4
+
+# Configuration (12-factor / env-driven)
+django-environ>=0.11,<1
+
+# API
+djangorestframework>=3.15,<4
+django-filter>=24.3
+
+# Async task queue: Celery + RabbitMQ broker + Redis result backend
+celery>=5.4,<6
+django-celery-results>=2.5,<3
+django-celery-beat>=2.7,<3          # DB-backed periodic task schedule
+
+# Redis (cache, sessions, Celery result backend)
+redis>=5.2,<6
+django-redis>=5.4,<6
+
+# Serving static files & app servers
+whitenoise>=6.8,<7
+gunicorn>=23,<24
+uvicorn[standard]>=0.34,<1          # ASGI option
+
+# Observability
+sentry-sdk>=2.18,<3
+django-prometheus>=2.3,<3
+structlog>=24.4,<25
+
+# Task monitoring
+flower>=2.0,<3
+
+# CORS (frontend clients)
+django-cors-headers>=4.6,<5
+
+# Health checks
+django-health-check>=3.18,<4

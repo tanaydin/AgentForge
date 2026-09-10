@@ -20,3 +20,4 @@ Each significant, hard-to-reverse decision is recorded as one immutable file:
 
 Current ADRs:
 - `0001-dependency-free-scaffold.md`
+- `0002-production-stack.md` — Django + PostgreSQL + Celery/RabbitMQ + Redis

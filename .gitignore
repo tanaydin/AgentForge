@@ -10,18 +10,32 @@ Thumbs.db
 .env.*
 !.env.example
 
-# Logs
-*.log
-logs/
-
-# Build / dependency output (nothing generates these yet; listed for the future)
-node_modules/
-dist/
-build/
-target/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
 .venv/
 venv/
-coverage/
-.cache/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Django
+/staticfiles/
+/media/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Docker
+docker-compose.override.yml
+
+# Logs / coverage / build
+*.log
+logs/
+.coverage
+htmlcov/
+coverage.xml
+dist/
+build/

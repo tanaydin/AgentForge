@@ -1,0 +1,22 @@
+-r requirements.txt
+
+# Tests
+pytest>=8.3,<9
+pytest-django>=4.9,<5
+pytest-cov>=6.0
+pytest-xdist>=3.6
+factory-boy>=3.3
+model-bakery>=1.20
+
+# Lint / format / types
+ruff>=0.8
+black>=24.10
+mypy>=1.13
+django-stubs>=5.1
+djangorestframework-stubs>=3.15
+
+# Dev tooling
+pre-commit>=4.0
+ipython
+django-debug-toolbar>=4.4
+watchdog

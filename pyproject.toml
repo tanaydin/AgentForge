@@ -1,0 +1,37 @@
+[project]
+name = "project"
+version = "0.0.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ", "C4", "SIM"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = "/migrations/"
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+exclude = ["migrations/"]
+
+[tool.django-stubs]
+django_settings_module = "src.config.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "src.config.settings"
+python_files = ["test_*.py", "tests.py"]
+testpaths = ["tests"]
+addopts = "--reuse-db --strict-markers"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/migrations/*", "*/tests/*"]
